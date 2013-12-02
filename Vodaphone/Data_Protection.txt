@@ -1,0 +1,126 @@
+A message from an security guru, 
+You could call me a bad guy but i don't really break systems or into systems for fun.. not anymore.
+But i have, Right now im more comfortable working against people going in.
+I know how i would get in and that's important for anyone working against yourself.
+
+Today i am an javascript programmer first and foremost.
+And yes i am an icelander, But i want to remain anonymous for now.
+
+
+This is how i, today would secure sensitive data... If i had a bottomless pit of money.
+The safety of users isn't really first priority since that costs, and how do you see the results?
+If you instate a small team dedicated to security, Chances are that's not going to be very visible.
+Of course a graphics guy is going to "show" more results, simply because you understand graphics.
+You don't understand the basic concepts of security and that is why having someone who does is important, 
+otherwise you're giving the order to do X and do Y because you can see that and you don't really tell them to secure it.
+
+
+
+Terms i shorthand>
+	front facing server = FFS
+	internal server = IS
+
+The whole idea behind my approach is that there is a separation between data and internet. For utmost security you don't want the front facing server(FFS) to know about the database or have any sort of direct access to it. 
+There are 2 reasons behind this, If an attacker gains access to the files he will still not be able to "connect" to the database and the second is to pro-actively monitor every request that goes to the database in real-time.
+
+
+This is a separation by pipe architecture, One end designed to be secure against the pipe. 
+And one end designed to be secure against the web.
+
+
+This separation system blocks out a lot of attacks,Like "select * from..."
+The database by default doesn't care about security, This is why they're considered "insecure"
+They don't ask "why are you doing that command" the only thing they care about is proper queries and correct passwords.
+
+
+And this separation allows you to scrutinize the usage, This would reduce the time-to-action if an attack does happen.
+
+
+This separate layer essentially breaks 99% of all the attacks i know or have seen used.
+If the system is correctly designed/implemented the only attacks i see feasible is either from the inside > employee
+or something on the OS level, Buffer overflows etc.
+
+
+
+To explain this, Normally this is how you're going to set it up. 
+Internet <---> Front facing server <---> Database.
+
+This works, But the database is inherently insecure. It's too close to the internet to be considered safe especially when it's of utmost importance that it doesnt leak.
+
+It's like building a tall wall and then you leave your door unlocked because you "know" nothing is getting past that wall.
+Then someone breaks in and you think, Why didn't i put my money in a safe?
+
+
+
+So lets assume there is no confidential data that you need to fetch from the IS, FFS only pushes data to IS.
+But you have some data that you want to push to a secure location.
+
+Now it's like this.
+Internet <---> Front facing server ---> Internal server <---> Something
+                                   ---\ Database
+
+In functions where no response is required the IS should be hard-coded to return nothing, 
+If it fails it should still return nothing except a 200, If it does return a 500 for some reason(possible bug/system impl.)
+The 500 should be logged because of it's severity
+And FFS should still be consistent in it's returns(No error 200). 
+
+You need(should) go into more aggressive actions if the IS needs to return something.
+
+The "errors" should be logged elsewhere, And you want to develop a system that gives you "errors" and failed requests in real-time. Because the moment something does happen you want to know, Instead you might give the attacker days to refine his approach and eventually get in.
+
+Chances are if the system is correctly designed to differentiate between 404 and errors, Then this will be less than one error a week. The system should also allow a person to view 404's in real time if chosen.
+Seeing 404's is essential for blocking "crawler" ip's
+
+
+Essentially the FFS under normal conditions and normal use should never error out, If it does it's either a>
+	Server error.
+	Attack.
+	(Malformed url)
+
+The latter is consistent with an attack and is part of why you need to be proactive around the web
+Note a malformed url is not a 404, A malformed url is something that exists like view.aspx but with parameters that cause errors.
+ 
+Most 2000's software is still blind towards it's user, 2010's is roughly where it started with node.js and smart websites.
+
+I suggest you use this opportunity to redesign for the next 10 years, Computers ages. Systems outdate, No longer is delphi or fortran acceptable for applications but they once were.
+
+For FFS security you don't want the internet to be able to distinguish software version or type.
+You want to streamline returned headers since that can also lend itself to unintentional information.
+
+
+The more information you give a potential attacker the more the chances is he will succeed,
+The worst you can do is give detailed error descriptions, "fopen failed... line 21"
+	In my "adventures" on the internet this is how i got in more than once.
+The second worst thing you can do is show a 500 error, This signals the hacker that the string he posted caused an error.
+	I also got in directly because of this, I refined my SQL string for a good 15 minutes before i got in.
+	The system was inherently broken but i wouldn't have known to continue without it. There were other hints too though.
+	In any case it's bad.
+What you should do is keep a 404 for all occasions. and log privately.
+	This is the only system that's consistently kept me out, If there is a bugged system there is virtually no way for me to fish it out IF there is a bug.
+
+You need to treat every user like he's about to steal everything.
+Keep the user in the dark because the average user wont notice, The attacker will notice and use it.
+
+Ask yourself is the data confidential? Yes?
+Then it should go in a place where it's not easily accessible by the web.
+Instead of a "select user from users" which eventually an attacker MIGHT figure out how to change to select * from users.
+you should use the pipe with a .login(xxx,xxx)
+He can never have direct access to what goes on beyond that simple call.
+
+
+But you don't want everything to go into this "internal" space.
+That also can cause unintentional security bugs, If it's not confidential don't put it there.
+The more data and data points flowing in the more the % of something going wrong.
+
+
+So in the end my advice to you>
+	Seperate sensitive data from the web.
+	leave unsensitive data on a "quick" medium since it's likely news or categories/products	
+	
+	Instate a real time console for errors, This does not need to be manned 24/7 but if the IT can have it open in the
+		background that helps.
+	Instate a security "guy" or a group of guys, Can also handle internal security / sharing files emails etc.
+	
+	If you're keeping the website, Refactor secure, Scrutinize and go over security with the "guy or guys"
+	If not, Keep the "guy or guys" in the loop at all steps of development.
+	Then keep at least one "guy" to oversee the running system, are ports open? should they be open?
